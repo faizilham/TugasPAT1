@@ -6,7 +6,7 @@ EXT = cpp
 # modules
 MODULES = $(wildcard src/*.$(EXT))
 
-LIB = 
+LIB = -lev
 INCLUDE = 
 
 MODE = debug

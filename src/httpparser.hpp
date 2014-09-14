@@ -8,8 +8,10 @@
 #include <map>
 #include <string>
 #include <cstdio>
+#include <fstream>
+#include <sstream>
 
-using std::map; using std::string;
+using namespace std;
 
 static inline string itostr(int i){
 	char buf[10];
@@ -45,6 +47,48 @@ static inline map<string,string> get_request(string request){
 	reqmap["method"] = request.substr(0, space1);
 	
 	return reqmap;
+}
+
+static inline string get_url(string request){
+	map<string,string> reqmap;
+
+	int space1 = request.find(" ");
+	int space2 = request.find(" ", space1+1);
+	
+	int urllen = space2 - space1 - 1;
+	
+	return request.substr(space1 + 1, urllen);
+}
+
+static string file404 = "<html><head></head><body><h2>Error 404: File Not Found</h2></body></html>";
+
+static inline string GetResponse(string webdir, string URL){
+	ifstream inFile;
+	string filePath, response;
+	
+	// Send HTML Response
+	filePath = webdir + URL;
+	
+	// If path ends with '/', requesting index
+	if(filePath.at( filePath.length() - 1 ) == '/'){
+		filePath += "index.html";
+	}
+	
+	inFile.open(filePath.c_str());
+	if(!inFile){
+		response = build_response(404, "text/html", file404);
+		return response;
+	}else{
+		string output;
+		stringstream stream;
+		
+		stream << inFile.rdbuf();
+		output = stream.str();
+		
+		response = build_response(200, "text/html", output);
+		return response;
+		inFile.close();
+	}
 }
 
 #endif
